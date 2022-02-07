@@ -24,8 +24,9 @@ public class GameManager : MonoBehaviour
 
 	public float volume;
 
-	public List<int> totalShots { get; private set; }
-	public List<TextMeshProUGUI> shotCounters;
+	public int[] totalShots { get; private set; }
+	private TextMeshProUGUI[] shotCounters;
+	private Gun[] guns;
 
 	private void Awake()
 	{
@@ -39,6 +40,15 @@ public class GameManager : MonoBehaviour
 		{
 			Destroy(gameObject);
 		}
+
+		totalShots = new int[4];
+		totalShots[0] = 1;
+		totalShots[1] = 1;
+		totalShots[2] = 1;
+		totalShots[3] = 1;
+
+		shotCounters = new TextMeshProUGUI[4];
+		guns = new Gun[4];
 	}
 
 	private void Start()
@@ -48,13 +58,46 @@ public class GameManager : MonoBehaviour
 
 	private void Update()
 	{
-		
+		if (SceneManager.GetActiveScene().buildIndex == 1)
+		{
+			if (shotCounters.Where(x => x == null).ToList().Count > 0)
+			{
+				List<TextMeshProUGUI> tmprouguis = FindObjectsOfType<TextMeshProUGUI>().Where(x => x.name == "p1Counter" || x.name == "p2Counter" || x.name == "p3Counter" || x.name == "p4Counter").ToList();
+				shotCounters[0] = tmprouguis.Where(x => x.name == "p1Counter").FirstOrDefault();
+				shotCounters[1] = tmprouguis.Where(x => x.name == "p2Counter").FirstOrDefault();
+				shotCounters[2] = tmprouguis.Where(x => x.name == "p3Counter").FirstOrDefault();
+				shotCounters[3] = tmprouguis.Where(x => x.name == "p4Counter").FirstOrDefault();
+			}
+
+			if (guns.Where(x => x == null).ToList().Count > 0)
+			{
+				List<Gun> guns = FindObjectsOfType<Gun>().Where(x => x.name == "p1Barrel" || x.name == "p2Barrel" || x.name == "p3Barrel" || x.name == "p4Barrel").ToList();
+				this.guns[0] = guns.Where(x => x.name == "p1Barrel").FirstOrDefault();
+				this.guns[1] = guns.Where(x => x.name == "p2Barrel").FirstOrDefault();
+				this.guns[2] = guns.Where(x => x.name == "p3Barrel").FirstOrDefault();
+				this.guns[3] = guns.Where(x => x.name == "p4Barrel").FirstOrDefault();
+			}
+
+			shotCounters[0].text = totalShots[0].ToString();
+			shotCounters[1].text = totalShots[1].ToString();
+			shotCounters[2].text = totalShots[2].ToString();
+			shotCounters[3].text = totalShots[3].ToString();
+		}
 	}
 
-	public void addShots(int shots, int player)
+	public void Double(int player)
 	{
-		totalShots[player - 1] += shots;
+		totalShots[player - 1] *= 2;
 		shotCounters[player - 1].text = totalShots[player - 1].ToString();
+	}
+
+	public void Shoot(int player)
+	{
+		for (int i = 0; i < totalShots[player - 1]; i++)
+		{
+			guns[player - 1].Shoot();
+		}
+		totalShots[player - 1] = 1;
 	}
 
 	public IEnumerator SlowLoadScene(int scene, Image transition)
